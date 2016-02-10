@@ -1,4 +1,4 @@
-# We don't want to push and pull the massive data files we'll be using
+# We don't want to push or pull any of our data files
 *.json
 
 # Byte-compiled / optimized / DLL files
