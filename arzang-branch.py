@@ -21,7 +21,13 @@ from nltk.corpus import stopwords
 
 count_vect = CountVectorizer(stop_words=set(stopwords.words('english')))
 train_counts = count_vect.fit_transform(random.sample(raw_data, 30000))
-test_counts = count_vect.transform(random.sample(raw_data, 100))
+
+
+
+raw_data = 0
+btr = pickle.load(open("dict-of-business-to-reviews.p", "rb"))
+
+test_counts = count_vect.transform(btr["Appliance Service Center"])
 
 tfidf_transformer = TfidfTransformer()
 train_tfidf = tfidf_transformer.fit_transform(train_counts)
@@ -40,7 +46,7 @@ import sklearn.feature_extraction.text as text
 
 from sklearn import decomposition
 
-num_topics = 20
+num_topics = 60
 num_top_words = 20
 
 nmf = decomposition.NMF(n_components=num_topics, random_state=1)
@@ -68,6 +74,26 @@ for t in range(len(topic_words)):
    
 
 result = nmf.transform(dtm_test)
+
+# Find the top topics for the restaurant given above
+m = []
+for i in range(num_topics):
+    m.append(0)
+    
+for i in result:
+    for j in range(num_topics):
+        m[j] += i[j]
+
+top5 = [(0,0),(0,0),(0,0),(0,0),(0,0)]
+
+for i in range(num_topics):
+    if m[i] > top5[4][1]:
+        top5[4] = (i, m[i])
+        top5.sort(reverse=True)
+
+for (t,p) in top5:
+    print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
+    
 
 """
 novel_names = []
