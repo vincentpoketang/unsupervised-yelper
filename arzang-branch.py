@@ -18,6 +18,7 @@ raw_data = pickle.load(open("list-of-reviews.p", "rb"))
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from nltk.corpus import stopwords
+import matplotlib.pyplot as plt
 
 count_vect = CountVectorizer(stop_words=set(stopwords.words('english')))
 train_counts = count_vect.fit_transform(random.sample(raw_data, 30000))
@@ -26,8 +27,8 @@ train_counts = count_vect.fit_transform(random.sample(raw_data, 30000))
 
 raw_data = 0
 btr = pickle.load(open("dict-of-business-to-reviews.p", "rb"))
-
-test_counts = count_vect.transform(btr["Appliance Service Center"])
+docnames = ["Appliance Service Center", "Burger King", "McDonald's", "Hunter Farm", "Panda Chinese Restaurant"]
+test_counts = count_vect.transform(btr["Appliance Service Center"] + btr["Burger King"] + btr["Hunter Farm"] + btr["McDonald's"] + btr["Panda Chinese Restaurant"])
 
 tfidf_transformer = TfidfTransformer()
 train_tfidf = tfidf_transformer.fit_transform(train_counts)
@@ -46,15 +47,15 @@ import sklearn.feature_extraction.text as text
 
 from sklearn import decomposition
 
-num_topics = 60
-num_top_words = 20
+num_topics = 20
+num_top_words = 5
 
 nmf = decomposition.NMF(n_components=num_topics, random_state=1)
 
 # this next step may take some time
 doctopic = nmf.fit_transform(dtm)
 doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
-
+print(doctopic.shape)
 
 # print words associated with topics
 topic_words = []
@@ -95,35 +96,76 @@ for (t,p) in top5:
     print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
     
 
-"""
-novel_names = []
-
-for fn in filenames:
-    basename = os.path.basename(fn)
-    name, ext = os.path.splitext(basename)
-    name = name.rstrip('0123456789')
-    novel_names.append(name)
+doctopic = nmf.transform(dtm_test)
+doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
 
 # turn this into an array so we can use NumPy functions
-novel_names = np.asarray(novel_names)
+docnames = np.asarray(docnames)
+
 doctopic_orig = doctopic.copy()
 
 # use method described in preprocessing section
-num_groups = len(set(novel_names))
+num_groups = len(set(docnames))
 
-doctopic_grouped = np.zeros((num_groups, num_topics))
+doctopic_grouped = np.zeros((num_groups,num_topics))
 
-for i, name in enumerate(sorted(set(novel_names))):
-    doctopic_grouped[i, :] = np.mean(doctopic[novel_names == name, :], axis=0)
+print("i, ")
+print(doctopic_grouped[1, :])
+
+for i, name in enumerate(sorted(set(docnames))):
+    doctopic_grouped[i, :] = np.mean(doctopic[docnames == name, :], axis=0)
 
 doctopic = doctopic_grouped
-"""
+
+businesses = sorted(set(docnames))
+
+print("Top NMF topics in...")
+
+
+for i in range(len(doctopic)):
+    top_topics = np.argsort(doctopic[i,:])[::-1][0:3]
+    top_topics_str = ' '.join(str(t) for t in top_topics)
+    print("{}: {}".format(businesses[i], top_topics_str))
     
-"""
-throw out short reviews
-throw out words used in less than 20 reviews
+print(doctopic.shape)
+N, K = doctopic.shape  # N documents, K topics
 
-look for bi-grams and tri-grams that are noun phrases: more accurate for this type of work
+ind = np.arange(N)  # the x-axis locations for the novels
 
-use the topics of a document as features of the document and compare it to ratings
-"""
+width = 0.5  # the width of the barsb
+plots = []
+
+height_cumulative = np.zeros(N)
+
+for k in range(K):
+    color = plt.cm.coolwarm(k/K, 1)
+    if k == 0:
+        p = plt.bar(ind, doctopic[:, k], width, color=color)
+    else:
+        p = plt.bar(ind, doctopic[:, k], width, bottom=height_cumulative, color=color)
+    height_cumulative += doctopic[:, k]
+    plots.append(p)
+
+plt.ylim((0, 1))  # proportions sum to 1, so the height of the stacked bars is 1
+
+plt.ylabel('Topics')
+
+
+plt.title('Topics in businesses')
+
+
+plt.xticks(ind+width/2, docnames)
+
+plt.yticks(np.arange(0, 1, 10))
+
+topic_labels = ['Topic {}'.format(topic_words[k][:3]) for k in range(K)]
+
+# see http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.legend for details
+# on making a legend in matplotlib
+plt.legend([p[0] for p in plots], topic_labels)
+plt.show()
+
+print(doctopic.shape)
+print("done")
+
+

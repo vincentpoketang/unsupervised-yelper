@@ -50,7 +50,7 @@ topic_words = []
 
 for topic in nmf.components_:
     word_idx = np.argsort(topic)[::-1][0:num_top_words]
-    print(word_idx)
+    print(np.argsort(topic)[::-1])
     topic_words.append([vocab[i] for i in word_idx])
 
 doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
@@ -66,44 +66,44 @@ for t in range(len(topic_words)):
 
 print (nmf.transform(dtm_test))
 
-#N, K = doctopic.shape  # N documents, K topics
-#
-#ind = np.arange(N)  # the x-axis locations for the novels
-#
-#width = 0.5  # the width of the bars
-#
-#plots = []
-#
-#height_cumulative = np.zeros(N)
-#
-#for k in range(K):
-#    color = plt.cm.coolwarm(k/K, 1)
-#    if k == 0:
-#        p = plt.bar(ind, doctopic[:, k], width, color=color)
-#    else:
-#        p = plt.bar(ind, doctopic[:, k], width, bottom=height_cumulative, color=color)
-#    height_cumulative += doctopic[:, k]
-#    plots.append(p)
-#
-#plt.ylim((0, 1))  # proportions sum to 1, so the height of the stacked bars is 1
-#
-#plt.ylabel('Topics')
-#
-#
-#plt.title('Topics in businesses')
-#
-#
-#plt.xticks(ind+width/2, docnames)
-#
-#plt.yticks(np.arange(0, 1, 10))
-#
-#topic_labels = ['Topic {}'.format(topic_words[k][:3]) for k in range(K)]
-#
-## see http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.legend for details
-## on making a legend in matplotlib
-#plt.legend([p[0] for p in plots], topic_labels)
-#
-#plt.show()
+N, K = doctopic.shape  # N documents, K topics
+
+ind = np.arange(N)  # the x-axis locations for the novels
+
+width = 0.5  # the width of the bars
+
+plots = []
+
+height_cumulative = np.zeros(N)
+
+for k in range(K):
+    color = plt.cm.coolwarm(k/K, 1)
+    if k == 0:
+        p = plt.bar(ind, doctopic[:, k], width, color=color)
+    else:
+        p = plt.bar(ind, doctopic[:, k], width, bottom=height_cumulative, color=color)
+    height_cumulative += doctopic[:, k]
+    plots.append(p)
+
+plt.ylim((0, 1))  # proportions sum to 1, so the height of the stacked bars is 1
+
+plt.ylabel('Topics')
+
+
+plt.title('Topics in businesses')
+
+
+plt.xticks(ind+width/2, docnames)
+
+plt.yticks(np.arange(0, 1, 10))
+
+topic_labels = ['Topic {}'.format(topic_words[k][:3]) for k in range(K)]
+
+# see http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.legend for details
+# on making a legend in matplotlib
+plt.legend([p[0] for p in plots], topic_labels)
+
+plt.show()
 
 #for review in range(20):
 #    counts = np.zeroes(num_topics)
