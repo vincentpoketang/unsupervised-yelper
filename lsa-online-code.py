@@ -1,3 +1,7 @@
+#
+# from http://www.puffinwarellc.com
+#
+
 from numpy import zeros
 from scipy.linalg import svd
 #following needed for TFIDF
