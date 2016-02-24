@@ -14,7 +14,7 @@ import pickle
 import random
 
 # load the list of all reviews
-raw_data = pickle.load(open("list-of-reviews.p", "rb"))
+raw_data = pickle.load(open("pickles/list-of-reviews.p", "rb"))
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -31,7 +31,7 @@ train_counts = count_vect.fit_transform(random.sample(raw_data, 30000))
 raw_data = 0
 
 # load business to list of reviews for that business dictionary
-btr = pickle.load(open("dict-of-business-to-reviews.p", "rb"))
+btr = pickle.load(open("pickles/dict-of-business-to-reviews.p", "rb"))
 
 # hardcoded names of test businesses
 docnames = ["Appliance Service Center", "Burger King", "McDonald's", "Hunter Farm", "Panda Chinese Restaurant"]

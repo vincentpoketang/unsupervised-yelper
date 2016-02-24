@@ -13,7 +13,7 @@ topic summary
 import pickle
 import random
 
-raw_data = pickle.load(open("list-of-reviews.p", "rb"))
+raw_data = pickle.load(open("pickles/list-of-reviews.p", "rb"))
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -25,7 +25,7 @@ train_counts = count_vect.fit_transform(random.sample(raw_data, 30000))
 
 
 raw_data = 0
-btr = pickle.load(open("dict-of-business-to-reviews.p", "rb"))
+btr = pickle.load(open("pickles/dict-of-business-to-reviews.p", "rb"))
 
 test_counts = count_vect.transform(btr["Appliance Service Center"])
 
