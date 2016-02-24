@@ -13,29 +13,48 @@ topic summary
 import pickle
 import random
 
-raw_data = pickle.load(open("list-of-reviews.p", "rb"))
+# load the list of all reviews
+raw_data = pickle.load(open("pickles/list-of-reviews.p", "rb"))
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from nltk.corpus import stopwords
 import matplotlib.pyplot as plt
 
+# set up a count vectorizer that removes english stopwords when building a term-doc matrix
 count_vect = CountVectorizer(stop_words=set(stopwords.words('english')))
+
+# build the term frequency per document matrix from a random sublist of 30,000 documents
 train_counts = count_vect.fit_transform(random.sample(raw_data, 30000))
 
+# reset the raw_data to clear space in memory
+raw_data = 0
 
+# load business to list of reviews for that business dictionary
+btr = pickle.load(open("pickles/dict-of-business-to-reviews.p", "rb"))
 
+<<<<<<< HEAD:arzang-branch.py
 raw_data = 0
 btr = pickle.load(open("dict-of-business-to-reviews.p", "rb"))
 docnames = ["ASC", "Burger King", "McDonald's", "Hunter Farm", "PCR"]
+=======
+# hardcoded names of test businesses
+docnames = ["Appliance Service Center", "Burger King", "McDonald's", "Hunter Farm", "Panda Chinese Restaurant"]
+
+# johnathan's thing
+>>>>>>> 0a6ed3a01f87af56b17436376262e7b13644f094:arzang-branch+johnathan.py
 test_counts = count_vect.transform(btr["Appliance Service Center"] + btr["Burger King"] + btr["Hunter Farm"] + btr["McDonald's"] + btr["Panda Chinese Restaurant"])
 
 tfidf_transformer = TfidfTransformer()
+
 train_tfidf = tfidf_transformer.fit_transform(train_counts)
 test_tfidf = tfidf_transformer.transform(test_counts)
 
+<<<<<<< HEAD:arzang-branch.py
 print(tfidf_transformer)
 print(train_tfidf)
+=======
+>>>>>>> 0a6ed3a01f87af56b17436376262e7b13644f094:arzang-branch+johnathan.py
 
 dtm = train_tfidf
 dtm_test = test_tfidf
