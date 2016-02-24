@@ -27,12 +27,15 @@ train_counts = count_vect.fit_transform(random.sample(raw_data, 30000))
 
 raw_data = 0
 btr = pickle.load(open("dict-of-business-to-reviews.p", "rb"))
-docnames = ["Appliance Service Center", "Burger King", "McDonald's", "Hunter Farm", "Panda Chinese Restaurant"]
+docnames = ["ASC", "Burger King", "McDonald's", "Hunter Farm", "PCR"]
 test_counts = count_vect.transform(btr["Appliance Service Center"] + btr["Burger King"] + btr["Hunter Farm"] + btr["McDonald's"] + btr["Panda Chinese Restaurant"])
 
 tfidf_transformer = TfidfTransformer()
 train_tfidf = tfidf_transformer.fit_transform(train_counts)
 test_tfidf = tfidf_transformer.transform(test_counts)
+
+print(tfidf_transformer)
+print(train_tfidf)
 
 dtm = train_tfidf
 dtm_test = test_tfidf
@@ -47,8 +50,8 @@ import sklearn.feature_extraction.text as text
 
 from sklearn import decomposition
 
-num_topics = 20
-num_top_words = 5
+num_topics = 5
+num_top_words = 10
 
 nmf = decomposition.NMF(n_components=num_topics, random_state=1)
 
@@ -57,6 +60,8 @@ doctopic = nmf.fit_transform(dtm)
 doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
 print(doctopic.shape)
 
+print("components")
+print(nmf.components_)
 # print words associated with topics
 topic_words = []
 for topic in nmf.components_:
@@ -71,7 +76,7 @@ print(word_idx)
 print()
 print()
 for t in range(len(topic_words)):
-   print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
+   print("Topic {}: {}".format(t+1, ' '.join(topic_words[t][:10])))
    
 
 result = nmf.transform(dtm_test)
@@ -93,11 +98,14 @@ for i in range(num_topics):
         top5.sort(reverse=True)
 
 for (t,p) in top5:
-    print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
+    print("Topic {}: {}".format(t+1, ' '.join(topic_words[t][:10])))
     
 
 doctopic = nmf.transform(dtm_test)
 doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
+
+print(dtm_test)
+print(doctopic)
 
 # turn this into an array so we can use NumPy functions
 docnames = np.asarray(docnames)
@@ -124,13 +132,16 @@ print("Top NMF topics in...")
 
 for i in range(len(doctopic)):
     top_topics = np.argsort(doctopic[i,:])[::-1][0:3]
-    top_topics_str = ' '.join(str(t) for t in top_topics)
+    top_topics_str = ' '.join(str(t+1) for t in top_topics)
     print("{}: {}".format(businesses[i], top_topics_str))
     
 print(doctopic.shape)
 N, K = doctopic.shape  # N documents, K topics
 
 ind = np.arange(N)  # the x-axis locations for the novels
+
+print("ind")
+print(ind)
 
 width = 0.5  # the width of the barsb
 plots = []
@@ -158,7 +169,7 @@ plt.xticks(ind+width/2, docnames)
 
 plt.yticks(np.arange(0, 1, 10))
 
-topic_labels = ['Topic {}'.format(topic_words[k][:3]) for k in range(K)]
+topic_labels = ['Topic {}'.format(k+1) for k in range(K)]
 
 # see http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.legend for details
 # on making a legend in matplotlib
@@ -167,5 +178,25 @@ plt.show()
 
 print(doctopic.shape)
 print("done")
+
+#mallet_vocab = []
+#
+#word_topic_counts = []
+#
+#with open("/tmp/word-topic.txt") as f:
+#for line in f:
+#    _, word, *topic_count_pairs = line.rstrip().split(' ')
+#    topic_count_pairs = [pair.split(':') for pair in topic_count_pairs]
+#    mallet_vocab.append(word)
+#    counts = np.zeros(num_topics)
+#    for topic, count in topic_count_pairs:
+#        counts[int(topic)] = int(count)
+#    word_topic_counts.append(counts)
+#
+#
+#In [45]: word_topic = np.array(word_topic_counts)
+#
+#In [46]: word_topic.shape
+#Out[46]: (21988, 5)
 
 
