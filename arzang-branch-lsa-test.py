@@ -88,6 +88,9 @@ topic summary
 import pickle
 import random
 
+# for consistent testing
+random.seed(1532525625823)
+
 raw_data = pickle.load(open("pickles/list-of-reviews.p", "rb"))
 
 from sklearn.feature_extraction.text import CountVectorizer
