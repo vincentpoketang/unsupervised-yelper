@@ -35,6 +35,10 @@ from sklearn import decomposition
 #tagged_doc = pos_tag(tokens)
 #parsed_doc = rpp.parse(tagged_doc)
 
+def get_reviews_for_business_name(name):
+    btr = pickle.load("dict-of-business-to-reviews.p", "rb")
+    return btr["name"]
+
 
 class TopicModeler:
     
@@ -83,7 +87,8 @@ class TopicModeler:
         return test_tfidf
     
     def predict_top_n_topics(self, busi_dtm, n : "num topics to return"):
-        topic_probs = self.model.transform(busi_dtm)
+        topic_matrix = self.model.transform(busi_dtm)
+        
         
     def gather_topic_words(self, num_top_words = 20) -> [[str]]:
         """
@@ -111,14 +116,20 @@ class TopicModeler:
            print("Topic {}: {}".format(t, ' '.join(topic_words[t][:number_of_words])));
         print()
         
-    def pipeline(self, number_of_documents : int):
+    def pipeline(self, name_of_target_business : str, number_of_documents : int):
         # for consistent testing
         random.seed(self.seed)
         
         raw_data = pickle.load(open("pickles/list-of-reviews.p", "rb"))
         documents = random.sample(raw_data, number_of_documents)
         
-        dtm = extract_features(documents)
+        dtm = self.extract_features(documents)
+        self.train_NMF_model(dtm)
+        
+        target_reviews = get_reviews_for_business_name(name_of_target_business)
+        dtm_test = self.build_test_matrix(target_reviews)
+        self.predict_top_n_topics()
+        
 
 
 result = nmf.transform(dtm_test)
@@ -144,3 +155,7 @@ print()
 for (t,p) in top5:
     print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
     
+    
+if __name__ == "__main__":
+    tm = TopicModeler()
+    tm.pipeline("Cindy Esser's Floral Shop", 60)

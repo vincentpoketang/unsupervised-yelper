@@ -17,26 +17,26 @@ import re
 random.seed(1532525625823)
 
 raw_data = pickle.load(open("pickles/list-of-reviews.p", "rb"))
-training_documents = random.sample(raw_data, 30000)
+training_data = random.sample(raw_data, 1000)
 
-from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.chunk.regexp import RegexpParser 
-from nltk import pos_tag
+#from nltk.stem.wordnet import WordNetLemmatizer
+#from nltk.chunk.regexp import RegexpParser 
+#from nltk import pos_tag
+#
+#training_data = []
 
-training_data = []
-
-# LEMMATIZING THE TOKENS
-print("Start lemmatization...")
-wnl = WordNetLemmatizer()
-for i in training_documents:
-    tokens = re.sub("(^ )|( $)+", "", re.sub("(\s|\.|\?|,|;|:)+", " ", i.lower())).split(" ")
-    lemmatized_doc = ""
-    for j in tokens:
-        lemmatized_doc += wnl.lemmatize(j) + " "
-    training_data.append(lemmatized_doc)
-print("Lemmatization complete.")
-
-pickle.dump(training_data, open("pickles/lemmatized-docs.p", "wb"))
+## LEMMATIZING THE TOKENS
+#print("Start lemmatization...")
+#wnl = WordNetLemmatizer()
+#for i in training_documents:
+#    tokens = re.sub("(^ )|( $)+", "", re.sub("(\s|\.|\?|,|;|:)+", " ", i.lower())).split(" ")
+#    lemmatized_doc = ""
+#    for j in tokens:
+#        lemmatized_doc += wnl.lemmatize(j) + " "
+#    training_data.append(lemmatized_doc)
+#print("Lemmatization complete.")
+#
+#pickle.dump(training_data, open("pickles/lemmatized-docs.p", "wb"))
 
 ## NOUN PHRASES AS TOKENS
 #rpp = RegexpParser('''
@@ -59,7 +59,7 @@ train_counts = count_vect.fit_transform(training_data)
 raw_data = None
 btr = pickle.load(open("pickles/dict-of-business-to-reviews.p", "rb"))
 
-test_counts = count_vect.transform(btr["Appliance Service Center"])
+test_counts = count_vect.transform(btr["Cindy Esser's Floral Shop"])
 
 tfidf_transformer = TfidfTransformer()
 train_tfidf = tfidf_transformer.fit_transform(train_counts)
@@ -81,53 +81,53 @@ from sklearn import decomposition
 num_topics = 60
 num_top_words = 20
 
-nmf = decomposition.NMF(n_components=num_topics, random_state=1)
-
-# this next step may take some time
-doctopic = nmf.fit_transform(dtm)
-doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
-
-
-# print words associated with topics
-topic_words = []
-for topic in nmf.components_:
-    word_idx = np.argsort(topic)[::-1][0:num_top_words]
-    topic_words.append([vocab[i] for i in word_idx])
-
-
-print(topic_words)
-print(word_idx)
-
-
-print()
-print()
-for t in range(len(topic_words)):
-   print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
-   
-
-result = nmf.transform(dtm_test)
-
-# Find the top topics for the restaurant given above
-m = []
-for i in range(num_topics):
-    m.append(0)
-    
-for i in result:
-    for j in range(num_topics):
-        m[j] += i[j]
-
-top5 = [(0,0),(0,0),(0,0),(0,0),(0,0)]
-
-for i in range(num_topics):
-    if m[i] > top5[4][1]:
-        top5[4] = (i, m[i])
-        top5.sort(reverse=True)
-
-print()
-print()
-for (t,p) in top5:
-    print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
-    
+nmf = decomposition.LatentDirichletAllocation(n_topics=num_topics, random_state=1)
+#
+## this next step may take some time
+#doctopic = nmf.fit_transform(dtm)
+#doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
+#
+#
+## print words associated with topics
+#topic_words = []
+#for topic in nmf.components_:
+#    word_idx = np.argsort(topic)[::-1][0:num_top_words]
+#    topic_words.append([vocab[i] for i in word_idx])
+#
+#
+#print(topic_words)
+#print(word_idx)
+#
+#
+#print()
+#print()
+#for t in range(len(topic_words)):
+#   print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
+#   
+#
+#result = nmf.transform(dtm_test)
+#
+## Find the top topics for the restaurant given above
+#m = []
+#for i in range(num_topics):
+#    m.append(0)
+#    
+#for i in result:
+#    for j in range(num_topics):
+#        m[j] += i[j]
+#
+#top5 = [(0,0),(0,0),(0,0),(0,0),(0,0)]
+#
+#for i in range(num_topics):
+#    if m[i] > top5[4][1]:
+#        top5[4] = (i, m[i])
+#        top5.sort(reverse=True)
+#
+#print()
+#print()
+#for (t,p) in top5:
+#    print("Topic {}: {}".format(t, ' '.join(topic_words[t][:10])))
+#    
 
 """
 novel_names = []
